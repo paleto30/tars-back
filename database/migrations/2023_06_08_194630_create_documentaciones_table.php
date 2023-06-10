@@ -15,9 +15,9 @@ class CreateDocumentacionesTable extends Migration
     {
         Schema::create('documentaciones', function (Blueprint $table) {
             $table->id();
-            $table->string('titulo');
-            $table->string('contenido');
-            $table->string('url_archivo');
+            $table->string('titulo',255);
+            $table->string('contenido',2000);
+            $table->string('url_archivo',2000);
             $table->unsignedBigInteger('id_categoria');
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by');
