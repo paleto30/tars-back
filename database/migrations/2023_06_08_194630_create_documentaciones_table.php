@@ -20,7 +20,7 @@ class CreateDocumentacionesTable extends Migration
             $table->string('url_archivo',2000);
             $table->unsignedBigInteger('id_categoria');
             $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
 
             $table->timestamps();
 

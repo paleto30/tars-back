@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Tymon\JWTAuth\Http\Middleware\Check;
 use App\Http\Controllers\CategoriasController;
+use App\Http\Controllers\PublicacionesController;
 
 Route::group([
 
@@ -27,9 +28,19 @@ Route::group([
     'prefix' => 'auth'
 ], function($router){
     Route::get('users', [UserController::class,'perfil']);
+
+    //rutas de categoria
+    Route::get('categoria/',[CategoriasController::class,'obtenerCategorias']);
+    Route::post('categoria/add',[CategoriasController::class,'crearCategoria']);
+
+
+    //rutas de publicaciones 
+    Route::post('publicacion/crear',[PublicacionesController::class,'CrearPublicacion']);
 });
 
 
-Route::get('categoria/',[CategoriasController::class,'obtenerCategorias']);
-Route::post('categoria/add',[CategoriasController::class,'crearCategoria']);
+
+
+
+
 
