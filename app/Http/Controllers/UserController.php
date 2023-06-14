@@ -15,6 +15,7 @@ class UserController extends Controller
     public function perfil()
     {
 
+
         if (auth()->user()) {
             return response()->json([
                 'message' => 'successfuly',
@@ -25,6 +26,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'autenticacion no encontrada'
         ]);
+
     }
 
     

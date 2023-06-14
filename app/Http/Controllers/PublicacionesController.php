@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Documentaciones;
 use App\Models\Publicaciones;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -27,7 +28,8 @@ class PublicacionesController extends Controller
 
     public function CrearPublicacion(Request $request)
     {
-
+            
+        try {
             $validator = Validator::make($request->all(),[
                 'titulo' => 'required|string|min:10|max:2000',
                 'contenido' => 'required|string|min:20|max:2000',
@@ -39,8 +41,14 @@ class PublicacionesController extends Controller
                 return response()->json(['error' => $validator->errors()],400);
             }
 
-            $ruta = Storage::disk('local')->put('archivos', $request->url_archivo);  
+
+            $existe = Documentaciones::where('titulo',$request->titulo)->value('id');
+
+            if (! is_null($existe)) {
+                return response()->json(['message'=>'Esta documentacion ya fue registrada anteriormente']);
+            }
             
+            $ruta = Storage::disk('local')->put('archivos', $request->url_archivo);  
             $documentacion = new Documentaciones;  //nueva documentacion
             $documentacion->titulo = $request['titulo'];
             $documentacion->contenido = $request['contenido'];
@@ -67,24 +75,54 @@ class PublicacionesController extends Controller
                 'message'=> 'no se a podido crear la publicacion',
                 'documentacion' => $documentacion,
             ]; 
+        } catch (\Throwable $th) {
+            return  $th->getMessage();
+        }
 
     }
 
 
 
-    public function listarPublicaciones(){
+    /* 
+        en esta funcion se va a crear un endpoint que me permita listar
+        todas las publicaciones que pertenezcan a un usuario especifico,
+        es decir que pertenezcan al usuario activo en su sesion
 
+        se espera que estas publicaciones vengan paginadas de a 10
 
-        try {
-            //code...
+        de estas publicaciones se quiere ver fecha y hora de publicacion,
+        la categoria
+        el titulo de la documentacion,
+        la descripcion del contenido ,
+        y por supuesto la ruta para consultar el archivo de dicha documentacion
+    */
+    public function listarPublicacionesPerfilUser(){
+
+        try { 
+
+            $publicaciones = User::join('publicaciones', 'users.id','=','publicaciones.id_user')
+            ->join('documentaciones','publicaciones.id_documentacion','=','documentaciones.id')
+            ->join('categorias','documentaciones.id_categoria','=','categorias.id')
+            ->select('publicaciones.id','publicaciones.created_at','categorias.nombre','documentaciones.titulo','documentaciones.contenido','documentaciones.url_archivo')
+            ->where('users.id', '=' ,auth()->id())
+            ->latest()->paginate(10);
+            
+            return response()->json([
+                'date' => $publicaciones
+            ]);
+
         } catch (\Throwable $th) {
-            //throw $th;
+            return response()->json([
+                    'error'=> $th->getMessage()
+            ]);
         }
     }
 
 
 
 
+
+    
 
 
 
