@@ -33,7 +33,27 @@ class UserController extends Controller
 
 
     
+    public function eliminarUsuario(Request $request){
 
+        try {
+
+            $user = User::find($request->id);
+            if (empty($user)) return "no existe el usuario";
+
+            $user->delete();
+            return [
+                'message' => 'Usuario eliminado',
+                'delete'  => $user
+            ];
+
+        } catch (\Exception $th) {
+            return $th->getMessage();
+        }
+
+
+
+
+    }
 
 
 
