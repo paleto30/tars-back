@@ -6,6 +6,7 @@ use App\Models\Documentaciones;
 use App\Models\Publicaciones;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,6 +31,7 @@ class PublicacionesController extends Controller
     {
             
         try {
+            
             $validator = Validator::make($request->all(),[
                 'titulo' => 'required|string|min:10|max:2000',
                 'contenido' => 'required|string|min:20|max:2000',
@@ -121,16 +123,72 @@ class PublicacionesController extends Controller
 
 
 
-
     
 
+    /* 
+        con el eso de la DB::transaction()
+        yo puedo solicitarle que le haga
+        el intento de enviar datos a la base de datos 
+        y si falla el proceso , entonces que automaticamente 
+        realize un rollback de los registros que agrego 
+        para evitar error en el registro de datos
+        
+        
+        tambien cuenta con una funcion ->  DB::afterCommit(callback),
+        recibe un callback la cual le permite ejecutar acciones despues de realizar
+        el commit de almacenamiento a la base de datos 
+
+        tambien puedo ejecutar la transaccion 
+        DB::beginTransaction();
+        y en de esta manera yo controlo en que momento se hace el commit y el rollback
+
+
+        FUNCIONES DE PRUEBA Y APRENDIZAJE
+    */
+
+    public function transaccion(Request $request)
+    {       
+
+
+        try {
+            DB::transaction(function() use($request){
+
+                $documentacion = new Documentaciones;  //nueva documentacion
+                $documentacion->titulo = $request['titulo'];
+                $documentacion->contenido = $request['contenido'];
+                $documentacion->url_archivo = $request['url_archivo'];
+                $documentacion->id_categoria = $request['id_categoria'];
+                $documentacion->created_by = 1;
+                
+                DB::afterCommit(function() use($documentacion) {
+                        echo "alguna mierda";
+                });
+                if ($documentacion->save()) {
+                    
+                    $newPublicacion = new Publicaciones; // nuvea publicacion
+                    $newPublicacion->id_user = 1;
+                    $newPublicacion->id_documentacion = $documentacion['id'];
+                    $newPublicacion->created_by = 1;
+                    $newPublicacion->save();
+                }
+            });
+        } catch (\Throwable $th) {
+            return ['error'=> 'fallo el guardado'];
+        }
+
+
+        return [
+            'message'=> 'succesfuly'
+        ];
+      
+
+       
+    }
 
 
 
 
-
-
-
+    
 
 
 
