@@ -43,11 +43,12 @@ Route::group([
 });
 
 
+Route::post('transa', [PublicacionesController::class,'transaccion']);
 
 Route::get('auth/user/list-document', [PublicacionesController::class,'listarPublicacionesPerfilUser'])->middleware(JwtMiddleware::class);
-
 
 Route::middleware('jwt.verify')->get('users',[UserController::class,'perfil']);
 
 
 
+Route::delete('borrarUser',[UserController::class,'eliminarUsuario']);
